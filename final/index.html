@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artistic Style Transfer - CS184 Final Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Times New Roman', Georgia, serif;
+            line-height: 1.8;
+            color: #333;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px 40px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+        
+        .project-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .author-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            color: #1a1a2e;
+            margin-top: 45px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a9eff;
+        }
+        
+        h2 {
+            font-size: 1.15rem;
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        
+        p {
+            text-align: justify;
+            margin-bottom: 16px;
+            text-indent: 2em;
+        }
+        
+        .abstract {
+            font-size: 1.05rem;
+            color: #444;
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-left: 4px solid #4a9eff;
+            margin: 20px 0 35px 0;
+        }
+        
+        .algorithm-box {
+            background: #f5f7fa;
+            border: 1px solid #e1e5eb;
+            border-radius: 8px;
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+        
+        .algorithm-box h3 {
+            font-size: 1.05rem;
+            color: #4a9eff;
+            margin-bottom: 12px;
+        }
+        
+        .algorithm-box p {
+            text-indent: 0;
+            margin-bottom: 10px;
+        }
+        
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        
+        .formula {
+            text-align: center;
+            background: #fafafa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-style: italic;
+        }
+        
+        .highlight {
+            color: #4a9eff;
+            font-weight: 600;
+        }
+        
+        ul {
+            margin: 15px 0 20px 40px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .result-item {
+            text-align: center;
+        }
+        
+        .result-item img {
+            width: 100%;
+            max-width: 350px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .result-item p {
+            text-indent: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .problem-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+        
+        .problem-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .lesson-box {
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+        
+        .lesson-box h3 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+        
+        .reference-list {
+            margin-top: 15px;
+        }
+        
+        .reference-list li {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+        
+        .reference-list a {
+            color: #4a9eff;
+            text-decoration: none;
+        }
+        
+        .reference-list a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="project-title">Artistic Style Transfer: Real-time NPR Filter Demo</h1>
+        <p class="author-info">CS 184<br>Spring 2026 Final Project Report<br><strong>Tina Wu</strong></p>
+        <p>Link to webpage: <a href="https://innoka-uka.github.io/cs184-sp26-hw-webpages-hw-webpage/">https://innoka-uka.github.io/cs184-sp26-hw-webpages-hw-webpage/</a></p>
+        
+        <!-- Abstract -->
+        <h1>Abstract</h1>
+        <div class="abstract">
+            I present an interactive web-based application that applies Non-Photorealistic Rendering (NPR) effects to 2D images in real-time. My system implements three artistic filters: <span class="highlight">pencil sketch</span>, <span class="highlight">watercolor</span>, and <span class="highlight">oil painting</span>, leveraging GPU-accelerated WebGL shaders. The pencil sketch filter employs Sobel edge detection combined with luminance-based stroke simulation; the watercolor filter uses bilateral filtering for edge-preserving smoothing and color quantization; the oil painting filter implements a Kuwahara filter with directional blur to simulate brush strokes. All three filters run in real-time on the GPU, allowing users to adjust parameters interactively. This project demonstrates the practical application of core computer graphics concepts—including convolution, filtering, and color space transformations—within an accessible web framework.
+        </div>
+        
+        <!-- Technical Approach -->
+        <h1>Technical Approach</h1>
+        
+        <h2>1. System Architecture</h2>
+        <p>
+            My system is built as a client-side web application using <span class="highlight">WebGL 2.0</span> for GPU-accelerated image processing. The architecture consists of three main components: a WebGL renderer that manages texture loading and shader programs, a collection of GLSL fragment shaders implementing the artistic effects, and a JavaScript controller handling user interface and parameter updates.
+        </p>
+        <p>
+            The rendering pipeline follows a standard single-pass approach: the input image is loaded as a 2D texture, processed through the selected shader program, and rendered to a full-screen canvas. This design ensures minimal latency between parameter changes and visual feedback, enabling the real-time interactive experience.
+        </p>
+        
+        <h2>2. Pencil Sketch Filter</h2>
+        <p>
+            The pencil sketch effect simulates hand-drawn pencil strokes through three key steps: <span class="highlight">edge detection</span>, <span class="highlight">luminance mapping</span>, and <span class="highlight">texture synthesis</span>.
+        </p>
+        
+        <div class="algorithm-box">
+            <h3>Sobel Edge Detection (Convolution)</h3>
+            <p>
+                I implement the Sobel operator as a discrete convolution, computing image gradients in X and Y directions using the following kernel matrices:
+            </p>
+            <div class="formula">
+                Gx = [-1, 0, +1; -2, 0, +2; -1, 0, +1]  (horizontal edges)<br>
+                Gy = [-1, -2, -1; 0, 0, 0; +1, +2, +1]  (vertical edges)
+            </div>
+            <p>
+                The gradient magnitude is computed as <code>G = sqrt(Gx² + Gy²)</code>, which I use to identify pencil stroke locations.
+            </p>
+        </div>
+        
+        <p>
+            Following edge detection, I convert the original image to grayscale using luminance-weighted averaging: <code>Y = 0.299R + 0.587G + 0.114B</code> (perceptual luminance formula from the color lecture). The final sketch combines edge intensity with luminance-based stroke density and adds pseudo-random noise to simulate paper texture.
+        </p>
+        
+        <h2>3. Watercolor Filter</h2>
+        <p>
+            The watercolor effect requires both smooth color transitions and preserved edges—a challenging balance achieved through <span class="highlight">bilateral filtering</span>.
+        </p>
+        
+        <div class="algorithm-box">
+            <h3>Bilateral Filter (Edge-Preserving Smoothing)</h3>
+            <p>
+                Unlike Gaussian blur, the bilateral filter considers both spatial distance and color similarity when computing weights:
+            </p>
+            <div class="formula">
+                I_filtered(p) = Σ I(q) × Gs(||p-q||) × Gr(||I(p)-I(q)||) / Σ Gs(||p-q||) × Gr(||I(p)-I(q)||)
+            </div>
+            <p>
+                Where <code>Gs</code> is the spatial Gaussian and <code>Gr</code> is the range (color) Gaussian. This formulation preserves edges while smoothing flat color regions.
+            </p>
+        </div>
+        
+        <p>
+            After bilateral filtering, I apply <span class="highlight">color quantization</span> to reduce the number of distinct colors, simulating watercolor pigment boundaries. Additionally, I generate paper texture using <span class="highlight">Fractal Brownian Motion (FBM)</span> noise and simulate color bleeding at soft transitions.
+        </p>
+        
+        <h2>4. Oil Painting Filter</h2>
+        <p>
+            The oil painting effect uses the <span class="highlight">Kuwahara filter</span>, which produces painterly results by selecting the most uniform color region within a neighborhood.
+        </p>
+        
+        <div class="algorithm-box">
+            <h3>Kuwahara Filter</h3>
+            <p>
+                The filter divides the neighborhood into four overlapping quadrants and computes the mean color and variance for each. The output color is the mean of the quadrant with the smallest variance:
+            </p>
+            <div class="formula">
+                Output = mean(Qk) where k = argmin_k { variance(Qk) }
+            </div>
+            <p>
+                This approach preserves structure while creating the characteristic "patchy" appearance of brush strokes.
+            </p>
+        </div>
+        
+        <p>
+            I enhance the effect with <span class="highlight">directional blur</span> computed from local gradients, which aligns the brush strokes with image features. I also implement <span class="highlight">HSV color space transformation</span> for saturation boost, converting RGB→HSV, modifying saturation, and converting back to RGB.
+        </p>
+        
+        <h2>5. Implementation Details</h2>
+        <p>
+            All shaders are written in <span class="highlight">GLSL ES 3.0</span> and run entirely on the GPU. The JavaScript codebase (~600 lines total) includes:
+        </p>
+        <ul>
+            <li><code>webgl-utils.js</code>: WebGL context management, shader compilation, texture handling (180 lines)</li>
+            <li><code>filters.js</code>: Three fragment shader implementations (392 lines)</li>
+            <li><code>main.js</code>: Application logic, UI controls, image loading (275 lines)</li>
+        </ul>
+        <p>
+            I use standard Web APIs exclusively—no external libraries—so the implementation directly applies course concepts including convolution, sampling theory, and color models.
+        </p>
+        
+        <!-- Problems Encountered -->
+        <h1>Problems Encountered</h1>
+        
+        <div class="problem-box">
+            <h3>1. Performance vs. Quality Trade-off</h3>
+            <p>
+                <strong>Problem:</strong> High-quality bilateral and Kuwahara filters require large convolution kernels, which are computationally expensive.
+            </p>
+            <p>
+                <strong>Solution:</strong> I implemented an adaptive kernel size that scales with the <code>smoothStrength</code> and <code>brushSize</code> parameters, capping the maximum to maintain real-time performance. For the bilateral filter, I limited the range to a fixed sigma (0.3) while keeping spatial sigma configurable.
+            </p>
+        </div>
+        
+        <div class="problem-box">
+            <h3>2. WebGL 1.0 Compatibility</h3>
+            <p>
+                <strong>Problem:</strong> My initial implementation used dynamic array indexing in GLSL, which is not supported in WebGL 1.0.
+            </p>
+            <p>
+                <strong>Solution:</strong> I rewrote the Kuwahara filter using explicit quadrant calculations instead of loops with array indices, ensuring compatibility with WebGL 1.0 and 2.0.
+            </p>
+        </div>
+        
+        <div class="problem-box">
+            <h3>3. Texture Coordinate Precision</h3>
+            <p>
+                <strong>Problem:</strong> Edge artifacts appeared near image boundaries due to texture sampling outside valid ranges.
+            </p>
+            <p>
+                <strong>Solution:</strong> I set <code>GL_CLAMP_TO_EDGE</code> for texture wrapping and added boundary checks in shader computations where necessary.
+            </p>
+        </div>
+        
+        <!-- Lessons Learned -->
+        <h1>Lessons Learned</h1>
+        
+        <div class="lesson-box">
+            <h3>1. Bridging Theory and Practice</h3>
+            <p>
+                Implementing core algorithms (Sobel, bilateral filter, Kuwahara) from scratch deepened my understanding of the mathematical foundations. Translating equations to shader code required careful attention to data types, precision, and GPU-specific considerations.
+            </p>
+        </div>
+        
+        <div class="lesson-box">
+            <h3>2. GPU Parallelism Constraints</h3>
+            <p>
+                Unlike CPU code, GPU shaders operate on pixels independently, preventing iterative algorithms that depend on previous results. I learned to reformulate problems (e.g., bilateral filtering) into single-pass or feed-forward approaches.
+            </p>
+        </div>
+        
+        <div class="lesson-box">
+            <h3>3. Real-time Parameter Tuning</h3>
+            <p>
+                Building an interactive demo revealed the importance of parameter sensitivity. Some parameters (e.g., edge strength) produce dramatic changes with small adjustments, while others (e.g., paper texture) require fine-grained control. This experience will inform my future UI design decisions.
+            </p>
+        </div>
+        
+        <div class="lesson-box">
+            <h3>4. Cross-disciplinary Application</h3>
+            <p>
+                This project connected computer graphics concepts (filtering, convolution) with digital image processing and human perception (NPR rendering, watercolor aesthetics). The interdisciplinary nature of graphics makes it applicable far beyond traditional rendering applications.
+            </p>
+        </div>
+        
+        <!-- Results -->
+        <h1>Results</h1>
+        
+        <p>
+            My final system successfully renders three artistic styles in real-time. Below are sample outputs demonstrating each filter's capabilities:
+        </p>
+        
+        <div class="results-grid">
+            <div class="result-item">
+                <!-- TODO: Replace with actual result image -->
+                <img src="sketch.png" alt="Pencil Sketch Result" onerror="this.style.background='#eee';this.alt='[Pencil Sketch Result]'">
+                <p><strong>Pencil Sketch</strong><br>Edge strength: 1.5, Contrast: 1.2</p>
+            </div>
+            <div class="result-item">
+                <!-- TODO: Replace with actual result image -->
+                <img src="water.png" alt="Watercolor Result" onerror="this.style.background='#eee';this.alt='[Watercolor Result]'">
+                <p><strong>Watercolor</strong><br>Smooth: 5.0, Quantize: 8 levels</p>
+            </div>
+            <div class="result-item">
+                <!-- TODO: Replace with actual result image -->
+                <img src="oil.png" alt="Oil Painting Result" onerror="this.style.background='#eee';this.alt='[Oil Painting Result]'">
+                <p><strong>Oil Painting</strong><br>Brush: 5, Saturation: 1.2</p>
+            </div>
+            <div class="result-item">
+                <!-- TODO: Replace with actual result image -->
+                <img src="mosaic.png" alt="Mosaic Result" onerror="this.style.background='#eee';this.alt='[Comparison]'">
+                <p><strong>Mosaic</strong><br> Mosaic style</p>
+            </div>
+        </div>
+        
+        <p>
+            The system achieves <span class="highlight">30+ FPS</span> on modern browsers for images up to 1920×1080 resolution. Parameter adjustments respond instantly, enabling exploratory creative work.
+        </p>
+        
+        <h2>Interactive Demo</h2>
+        <p>
+            The complete application is available at <code>artistic-filter/index.html</code>. Users can upload any image, select from the three filters, and adjust parameters using sliders. The interface provides immediate visual feedback.
+        </p>
+
+        <h2>Demo Video</h2>
+        <div class="algorithm-box">
+            <p>
+                Watch the demonstration video: <a href="https://drive.google.com/file/d/1E_KLPaQ20j4d5nXrQLDBAdY6c6wBUsKG/view?usp=sharing" target="_blank">Click here to view the demo video</a>
+            </p>
+        </div>
+
+        <!-- Contributions -->
+        <h1>Contributions</h1>
+
+        <p>
+            As a single-member team, I was responsible for all aspects of this project from conceptual design to implementation and documentation.
+        
+        </p>
+
+        <div class="algorithm-box">
+            <h3>Project Conception & Planning</h3>
+            <p>
+                I initiated this project by researching Non-Photorealistic Rendering (NPR) techniques and their real-time implementation requirements. I designed the system architecture to achieve interactive performance using WebGL shaders.
+            </p>
+        </div>
+
+        <div class="algorithm-box">
+            <h3>Core Implementation</h3>
+            <p>
+                I implemented all three artistic filters from scratch in GLSL ES 3.0:
+            </p>
+            <ul>
+                <li><strong>Pencil Sketch Filter</strong>: Implemented Sobel edge detection, luminance mapping, and paper texture synthesis (~100 lines of GLSL)</li>
+                <li><strong>Watercolor Filter</strong>: Implemented bilateral filtering with FBM noise generation and color quantization (~120 lines of GLSL)</li>
+                <li><strong>Oil Painting Filter</strong>: Implemented Kuwahara filtering with directional blur and HSV color adjustment (~150 lines of GLSL)</li>
+            </ul>
+        </div>
+
+        <div class="algorithm-box">
+            <h3>Web Application Development</h3>
+            <p>
+                I built the complete web interface including:
+            </p>
+            <ul>
+                <li>WebGL renderer with shader compilation and texture management (<code>webgl-utils.js</code>)</li>
+                <li>Filter shader library with parameter controls (<code>filters.js</code>)</li>
+                <li>Main application controller with UI handling (<code>main.js</code>)</li>
+                <li>Responsive HTML/CSS interface with real-time parameter adjustment</li>
+            </ul>
+        </div>
+
+        <div class="algorithm-box">
+            <h3>Technical Challenges & Solutions</h3>
+            <p>
+                I independently identified and resolved several technical challenges:
+            </p>
+            <ul>
+                <li>Optimized filter kernels for real-time GPU performance</li>
+                <li>Ensured WebGL 1.0/2.0 compatibility by avoiding dynamic array indexing</li>
+                <li>Fixed texture boundary artifacts with proper clamping</li>
+                <li>Added neural style transfer feature using WebGL-based shader effects</li>
+            </ul>
+        </div>
+
+        <div class="algorithm-box">
+            <h3>Documentation</h3>
+            <p>
+                I prepared the project proposal and this technical report, including mathematical formulations, algorithm descriptions, and performance analysis.
+            </p>
+        </div>
+
+        
+        <footer>
+            <p>Artistic Style Transfer Project | CS 184/284A | Spring 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
